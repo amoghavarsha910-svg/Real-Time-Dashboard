@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '8000:8000'
+    env_file:
+      - ./backend/.env
+    volumes:
+      - rtdd_db:/app/data
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # --------------------------------------------------------------------------
+  # PostgreSQL — uncomment to switch from SQLite to Postgres.
+  # Update DATABASE_URL in backend/.env to:
+  #   postgresql+asyncpg://rtdd:rtdd@db:5432/rtdd
+  # --------------------------------------------------------------------------
+  # db:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_DB: rtdd
+  #     POSTGRES_USER: rtdd
+  #     POSTGRES_PASSWORD: rtdd
+  #   ports:
+  #     - '5432:5432'
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   restart: unless-stopped
+
+volumes:
+  rtdd_db:
+  # postgres_data:
